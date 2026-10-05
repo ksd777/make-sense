@@ -12,6 +12,7 @@ import {ContextType} from "../../../../data/enums/ContextType";
 import {ImageActions} from "../../../../logic/actions/ImageActions";
 import {EventType} from "../../../../data/enums/EventType";
 import {LabelStatus} from "../../../../data/enums/LabelStatus";
+import {isReviewedFile} from "../../../../logic/projects/learningMarks";
 
 interface IProps {
     activeImageIndex: number;
@@ -81,13 +82,15 @@ class ImagesList extends React.Component<IProps, IState> {
     };
 
     private renderImagePreview = (index: number, isScrolling: boolean, isVisible: boolean, style: React.CSSProperties) => {
+        const imageData = this.props.imagesData[index];
         return <ImagePreview
             key={index}
             style={style}
             size={{width: 150, height: 150}}
             isScrolling={isScrolling}
             isChecked={this.isImageChecked(index)}
-            imageData={this.props.imagesData[index]}
+            isReviewed={isReviewedFile(imageData.fileData.name)}
+            imageData={imageData}
             onClick={() => this.onClickHandler(index)}
             isSelected={this.props.activeImageIndex === index}
         />

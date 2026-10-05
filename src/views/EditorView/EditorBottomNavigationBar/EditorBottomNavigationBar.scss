@@ -76,3 +76,15 @@
     align-content: center;
   }
 }
+.EditorBottomNavigationBar {
+  min-width: 0;
+  .ImageNavigation { flex-shrink: 0; margin: 0 8px; padding: 2px 12px; color: white;
+    background: #354758; border: 1px solid #8295a7; border-radius: 4px; cursor: pointer;
+    &:hover:not(:disabled) { background: #496984; }
+    &:focus-visible { outline: 2px solid #8dd7ff; }
+    &:disabled { opacity: .35; cursor: default; }
+  }
+  .ImagePosition { color: #eee; white-space: nowrap; font-size: 12px; }
+  .CurrentImageName { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+  .CurrentImageCount { display: none; }
+}

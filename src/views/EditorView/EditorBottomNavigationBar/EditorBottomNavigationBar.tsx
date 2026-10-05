@@ -3,7 +3,6 @@ import './EditorBottomNavigationBar.scss';
 import {ImageData} from "../../../store/labels/types";
 import {AppState} from "../../../store";
 import {connect} from "react-redux";
-import {ImageButton} from "../../Common/ImageButton/ImageButton";
 import {ISize} from "../../../interfaces/ISize";
 import {ContextType} from "../../../data/enums/ContextType";
 import classNames from "classnames";
@@ -35,26 +34,15 @@ const EditorBottomNavigationBar: React.FC<IProps> = ({size, imageData, totalImag
 
     return (
         <div className={getClassName()}>
-            <ImageButton
-                image={"ico/left.png"}
-                imageAlt={"previous"}
-                buttonSize={{width: 25, height: 25}}
-                onClick={() => ImageActions.getPreviousImage()}
-                isDisabled={activeImageIndex === 0}
-                externalClassName={"left"}
-            />
+            <button className="ImageNavigation" aria-label="Previous image" title="Previous image (Ctrl + Left)"
+                disabled={activeImageIndex <= 0} onClick={() => ImageActions.getPreviousImage()}>← Previous</button>
+            <span className="ImagePosition">{getImageCounter()}</span>
             {size.width > minWidth ?
-                <div className="CurrentImageName"> {imageData.fileData.name} </div> :
+                <div className="CurrentImageName" title={imageData.fileData.name}> {imageData.fileData.name} </div> :
                 <div className="CurrentImageCount"> {getImageCounter()} </div>
             }
-            <ImageButton
-                image={"ico/right.png"}
-                imageAlt={"next"}
-                buttonSize={{width: 25, height: 25}}
-                onClick={() => ImageActions.getNextImage()}
-                isDisabled={activeImageIndex === totalImageCount - 1}
-                externalClassName={"right"}
-            />
+            <button className="ImageNavigation" aria-label="Next image" title="Next image (Ctrl + Right)"
+                disabled={activeImageIndex >= totalImageCount - 1} onClick={() => ImageActions.getNextImage()}>Next →</button>
         </div>
     );
 };
