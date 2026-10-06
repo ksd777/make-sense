@@ -212,6 +212,10 @@ def create_app(project):
             return jsonify(project.infer(data.get('names')))
         except InferenceBusy as exc:
             return jsonify(error=str(exc)), 409
+    @app.route('/reviews', methods=['GET', 'POST'])
+    def reviews():
+        with project.lock:
+            return jsonify({name: dict(entry) for name, entry in project.state['reviews'].items()})
     @app.post('/predictions/<ident>')
     def predictions(ident):
         with project.lock:

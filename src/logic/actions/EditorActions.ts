@@ -72,7 +72,15 @@ export class EditorActions {
         DrawUtil.clearCanvas(EditorModel.canvas);
         if (!EditorActions.canRender()) return;
         EditorModel.primaryRenderingEngine.render(EditorActions.getEditorData());
-        EditorModel.supportRenderingEngine && EditorModel.supportRenderingEngine.render(EditorActions.getEditorData());
+        if (!EditorModel.areAnnotationsHidden) {
+            EditorModel.supportRenderingEngine && EditorModel.supportRenderingEngine.render(EditorActions.getEditorData());
+        }
+    }
+
+    public static toggleAnnotationsHidden(): boolean {
+        EditorModel.areAnnotationsHidden = !EditorModel.areAnnotationsHidden;
+        EditorActions.fullRender();
+        return EditorModel.areAnnotationsHidden;
     }
 
     // =================================================================================================================

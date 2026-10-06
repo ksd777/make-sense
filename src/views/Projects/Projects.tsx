@@ -2,6 +2,7 @@ import React,{useEffect,useRef,useState} from 'react';
 import {store} from '../..';
 import {SavedProject,listProjects,loadProject,saveProject,snapshot} from '../../logic/projects/projectStore';
 import {learningState} from '../../logic/projects/learningState';
+import {emitSaveStatus} from '../../logic/uiEvents';
 import './Projects.scss';
 
 export default function Projects() {
@@ -16,13 +17,15 @@ export default function Projects() {
         saving.current=true;setBusy(true);const captured=revision.current;
         const id=asNew || !active.current?crypto.randomUUID():active.current;
         const title=(asNew?name:projectName.current || name).trim() || state.general.projectData.name;
+        emitSaveStatus('saving', 'Saving…');
         try {
             const record=snapshot(state,id,title,learningState.capture());
             await saveProject(record,state.labels.imagesData,n=>{if(!active.current || asNew)setMessage(`Saving images ${n}/${state.labels.imagesData.length}…`);});
             active.current=id;projectName.current=title;dirty.current=revision.current!==captured;
             setMessage(`Saved ${title} · image ${record.labels.activeImageIndex+1}/${record.labels.imagesData.length} · ${new Date().toLocaleTimeString()}`);
+            emitSaveStatus(dirty.current?'unsaved':'saved', dirty.current?'Unsaved changes':'✓ Saved');
             navigator.storage?.persist?.().catch(()=>false);await refresh();
-        }catch(e){setMessage(`Save failed; keep this tab open and export your labels. ${String(e)}`);dirty.current=true;}
+        }catch(e){setMessage(`Save failed; keep this tab open and export your labels. ${String(e)}`);dirty.current=true;emitSaveStatus('failed','⚠ Save failed');}
         finally{saving.current=false;setBusy(false);}
     }
     useEffect(()=>{
@@ -32,7 +35,7 @@ export default function Projects() {
             if(next.imagesData===prior.imagesData && next.labels===prior.labels && next.activeImageIndex===prior.activeImageIndex &&
                next.activeLabelType===prior.activeLabelType && next.activeLabelNameId===prior.activeLabelNameId)return;
             prior=next;if(restore.current)return;
-            revision.current++;dirty.current=true;
+            revision.current++;dirty.current=true;emitSaveStatus('unsaved','Unsaved changes');
             if(active.current){window.clearTimeout(timer.current);timer.current=window.setTimeout(()=>save(),1500);}
         });
         const interval=window.setInterval(()=>{if(active.current && dirty.current && !saving.current)save();},10000);

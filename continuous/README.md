@@ -75,6 +75,11 @@ trigger fine-tuning → the new model re-predicts untouched images
    saves of an unchanged image do not advance the counter; repeated edits of one
    pending image count only once. Bottom-bar arrows navigate without saving, so use
    the panel arrows or the review button to persist ground truth.
+8. Review loop shortcuts: the bottom bar shows per-image manual/AI counts with
+   **Skip** (next unreviewed) and **✓ Approve & Next** (key `A`); `Q` temporarily
+   hides all boxes without changing them, both Delete and Backspace delete the
+   selected box. Plain arrow keys still pan the viewport; use Ctrl/Cmd+arrows for
+   strict dataset-order navigation.
 7. To revisit history, select a run under **Load previous preannotations** and click
    **Load run boxes into editor**, then correct and save.
 

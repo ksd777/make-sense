@@ -48,7 +48,8 @@
   .Background {
     position: absolute;
     z-index: 0;
-    background-color: $darkThemeThirdColor;
+    // Neutral matte so bright yellow scans read on both light and dark themes.
+    background-color: #7d858e;
     transition: background-color 0.3s ease-in-out, transform 0.3s;
   }
 

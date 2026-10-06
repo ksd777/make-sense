@@ -1,5 +1,4 @@
 import React from 'react';
-import ContinuousTraining from '../ContinuousTraining/ContinuousTraining';
 import './EditorView.scss';
 import EditorContainer from './EditorContainer/EditorContainer';
 import {PopupWindowType} from '../../data/enums/PopupWindowType';
@@ -30,7 +29,6 @@ const EditorView: React.FC<IProps> = ({activePopupType}) => {
         >
             <TopNavigationBar/>
             <EditorContainer/>
-            <ContinuousTraining/>
         </div>
     );
 };

@@ -78,6 +78,16 @@ class ProjectTest(unittest.TestCase):
         response = client.post('/infer', json={'names': ['SITE__2026__0002__scan.png']}, headers={'X-MakeSense-Local': '1'})
         self.assertEqual(response.status_code, 409)
 
+    def test_reviews_serves_saved_ground_truth(self):
+        self.review(2)
+        client = create_app(self.p).test_client()
+        self.assertEqual(client.post('/reviews', json={}).status_code, 403)
+        response = client.get('/reviews', headers={'X-MakeSense-Local': '1'})
+        self.assertEqual(response.status_code, 200)
+        entry = response.get_json()['SITE__2026__0002__scan.png']
+        self.assertEqual(len(entry['boxes']), 1)
+        self.assertIn('sha256', entry)
+
     def test_infer_predicts_known_images_with_cached_model(self):
         import hashlib
         from unittest.mock import patch

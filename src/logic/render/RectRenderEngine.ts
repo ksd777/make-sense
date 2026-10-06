@@ -16,6 +16,7 @@ import {RenderEngineSettings} from '../../settings/RenderEngineSettings';
 import {updateCustomCursorStyle} from '../../store/general/actionCreators';
 import {CustomCursorStyle} from '../../data/enums/CustomCursorStyle';
 import {LabelsSelector} from '../../store/selectors/LabelsSelector';
+import {confidenceText, isLowConfidence} from '../review/reviewWorkflow';
 import {EditorData} from '../../data/EditorData';
 import {BaseRenderEngine} from './BaseRenderEngine';
 import {RenderEngineUtil} from '../../utils/RenderEngineUtil';
@@ -191,7 +192,22 @@ export class RectRenderEngine extends BaseRenderEngine {
         const displayAsActive: boolean = labelRect.status === LabelStatus.ACCEPTED && labelRect.id === highlightedLabelId;
         const lineColor: string = BaseRenderEngine.resolveLabelLineColor(labelRect.labelId, displayAsActive)
         const anchorColor: string = BaseRenderEngine.resolveLabelAnchorColor(displayAsActive);
-        this.renderRect(rectOnImage, displayAsActive, lineColor, anchorColor);
+        this.renderRect(rectOnImage, displayAsActive, lineColor, anchorColor, labelRect.isCreatedByAI);
+        this.renderLabelText(labelRect, rectOnImage, displayAsActive);
+    }
+
+    // Compact label above the box: name only for manual boxes, name plus
+    // confidence for AI suggestions. Shown when selected/hovered, or always
+    // for low-confidence predictions that need attention.
+    private renderLabelText(labelRect: LabelRect, rectOnImage: IRect, emphasized: boolean) {
+        if (!emphasized && !isLowConfidence(labelRect)) return;
+        const names = LabelsSelector.getLabelNames();
+        const name = names.find(label => label.id === labelRect.labelId)?.name ?? 'Unlabeled';
+        const text = confidenceText(name, labelRect, true);
+        const textSize = 12;
+        DrawUtil.drawText(this.canvas, text, textSize,
+            {x: rectOnImage.x + 4, y: Math.max(rectOnImage.y - 9, textSize)},
+            '#ffffff', true, 'left', 'rgba(0,0,0,0.75)');
     }
 
     private drawActiveRect(labelRect: LabelRect, data: EditorData) {
@@ -206,13 +222,15 @@ export class RectRenderEngine extends BaseRenderEngine {
         const rectOnImage: IRect = RectUtil.translate(rect, data.viewPortContentImageRect);
         const lineColor: string = BaseRenderEngine.resolveLabelLineColor(labelRect.labelId, true)
         const anchorColor: string = BaseRenderEngine.resolveLabelAnchorColor(true);
-        this.renderRect(rectOnImage, true, lineColor, anchorColor);
+        this.renderRect(rectOnImage, true, lineColor, anchorColor, labelRect.isCreatedByAI);
+        this.renderLabelText(labelRect, rectOnImage, true);
     }
 
-    private renderRect(rectOnImage: IRect, isActive: boolean, lineColor: string, anchorColor: string) {
+    private renderRect(rectOnImage: IRect, isActive: boolean, lineColor: string, anchorColor: string, isAIPrediction: boolean = false) {
         const rectBetweenPixels = RenderEngineUtil.setRectBetweenPixels(rectOnImage);
-        DrawUtil.drawRectWithFill(this.canvas, rectBetweenPixels, DrawUtil.hexToRGB(lineColor, 0.2));
-        DrawUtil.drawRect(this.canvas, rectBetweenPixels, lineColor, RenderEngineSettings.LINE_THICKNESS);
+        DrawUtil.drawRectWithFill(this.canvas, rectBetweenPixels, DrawUtil.hexToRGB(lineColor, 0.06));
+        DrawUtil.drawRect(this.canvas, rectBetweenPixels, lineColor, RenderEngineSettings.LINE_THICKNESS,
+            isAIPrediction ? [7, 4] : []);
         if (isActive) {
             const handleCenters: IPoint[] = RectUtil.mapRectToAnchors(rectOnImage).map((rectAnchor: RectAnchor) => rectAnchor.position);
             handleCenters.forEach((center: IPoint) => {

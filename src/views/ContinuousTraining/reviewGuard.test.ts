@@ -14,6 +14,11 @@ it('rejects an image edited while predictions were in flight',()=>{
     const edited={...im,labelRects:im.labelRects.map(b=>({...b,rect:{...b.rect,x:20}}))};
     expect(canRefresh(edited,{},'other',new Set(),baseline)).toBe(false);
 });
+it('protects locally approved images even when the server never saw them',()=>{
+    const baseline={[im.id]:signature(im)};
+    expect(canRefresh(im,{},'other',new Set(),baseline,name=>name==='scan.png')).toBe(false);
+    expect(canRefresh(im,{},'other',new Set(),baseline,()=>false)).toBe(true);
+});
 it('allows empty predictions to replace untouched boxes but never treats emptiness as review',()=>{
     const empty={...im,labelRects:[]};
     expect(canRefresh(empty,{},'other',new Set(),{[im.id]:signature(empty)})).toBe(true);
